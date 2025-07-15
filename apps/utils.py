@@ -7,3 +7,6 @@ logging.getLogger('passlib').setLevel(logging.ERROR)         # This is added to 
 
 def hash(password: str):
     return pwd_context.hash(password)
+
+def verify(plain_pass, hashed_pass):
+    return pwd_context.verify(plain_pass, hashed_pass)

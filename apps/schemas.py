@@ -21,3 +21,8 @@ class UserCreate(BaseModel):
 class UserOut(BaseModel):
     id: int
     email: EmailStr
+
+
+class Login(BaseModel):
+    email: EmailStr
+    password: str

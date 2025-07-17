@@ -1,7 +1,7 @@
 from fastapi import status, Depends, HTTPException, APIRouter
 from typing import List
 from sqlalchemy.orm import Session
-from .. import models, schemas, utils
+from .. import models, schemas, utils, oauth2
 from ..database import get_db
 
 router = APIRouter(
@@ -25,7 +25,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
 
 # Create post
 @router.post("/", response_model=schemas.Post, status_code=status.HTTP_201_CREATED)
-def create_post(post: schemas.Post, db: Session = Depends(get_db)):
+def create_post(post: schemas.Post, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     new_post = models.Post(**post.dict())
     db.add(new_post)
     db.commit()
@@ -34,7 +34,7 @@ def create_post(post: schemas.Post, db: Session = Depends(get_db)):
 
 # Delete post
 @router.delete("/{id}", status_code= status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
+def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id)
     if post.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id : {id} doesn't exist")

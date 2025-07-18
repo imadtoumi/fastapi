@@ -16,6 +16,15 @@ def post(db: Session = Depends(get_db)):
     return posts
 
 
+# Get all posts of specific user
+@router.get("/{user_id}", response_model=List[schemas.Post])
+def get_posts(user_id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    posts = db.query(models.Post).filter(models.Post.user_id == user_id).all()
+    if not posts:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No posts created yet")
+    return posts
+
+
 # Get posts by their Ids
 @router.get("/{id}", response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
@@ -48,7 +57,7 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
         post.delete(synchronize_session=False)
         db.commit()
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Post does not belong to you")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not autorized to perform requested action")
 
 
 # Update post
@@ -64,6 +73,6 @@ def update_post(id: int, post_data: schemas.PostCreate, db: Session = Depends(ge
         post_query.update(post_data.dict(), synchronize_session=False)
         db.commit()
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Post does not belong to you")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not autorized to perform requested action")
     
     return post

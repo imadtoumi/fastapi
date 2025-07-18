@@ -17,7 +17,7 @@ def post(db: Session = Depends(get_db)):
 
 # Get posts by their Ids
 @router.get("/{id}", response_model=schemas.Post)
-def get_post(id: int, db: Session = Depends(get_db)):
+def get_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id : {id} does not exist")
@@ -44,7 +44,7 @@ def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(o
 
 # Update post
 @router.put("/{id}")
-def update_post(id: int, post_data: schemas.Post, db: Session = Depends(get_db)):
+def update_post(id: int, post_data: schemas.Post, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
     if post == None:

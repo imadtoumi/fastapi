@@ -10,8 +10,11 @@ class PostBase(BaseModel):
         from_attributes = True
 
 # Extending the PostBase model in the classes below to inherit the config we put in it without having to retype it
-class Post(PostBase):
+class PostCreate(PostBase):
     pass
+
+class Post(PostBase):
+    user_id: int
 
 
 class UserCreate(BaseModel):

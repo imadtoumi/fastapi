@@ -4,11 +4,13 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
 DB_USER= os.getenv("DB_USER")
 DB_PASS= os.getenv("DB_PASS")
-#Admin%40123
+
 # Giving the url of my DB "Dont hardcode user and password"
-SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASS}@192.168.1.12:30100/fastapi'
+SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/fastapi'
 
 # Engine is reposinble for connection to the the DB
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

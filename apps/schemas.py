@@ -25,14 +25,18 @@ class PostBase(BaseModel):
     class Config:
         from_attributes = True
 
-class PostCreate(PostBase):
-    pass
-
 class Post(PostBase):
     user_id: int
     created_at: datetime
     user: UserOut
+    
+class PostCreate(PostBase):
+    pass
 
+class PostOut(BaseModel):
+    Post: Post
+    votes: int
+    
 
 # Token models
 class Token(BaseModel):
@@ -45,4 +49,4 @@ class TokenData(BaseModel):
 
 class Vote(BaseModel):
     post_id: int
-    dir: conint(le=1)
+    dir: conint(le=1) # type: ignore

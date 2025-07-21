@@ -1,6 +1,7 @@
 from fastapi import status, Depends, HTTPException, APIRouter
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from .. import models, schemas, utils, oauth2
 from ..database import get_db
 
@@ -10,25 +11,30 @@ router = APIRouter(
 )
 
 # Get all posts 
-@router.get("/", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.PostOut])
 def post(db: Session = Depends(get_db), limit: int = 10, search: Optional[str] = ""):
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).all()
+    posts = db.query(models.Post, func.count(models.Votes.post_id).label("votes")).join(
+        models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).all()
+    
     return posts
 
 
+""" 
 # Get all posts of specific user
 @router.get("/{user_id}", response_model=List[schemas.Post])
 def get_posts(user_id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).filter(models.Post.user_id == user_id).all()
     if not posts:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No posts created yet")
-    return posts
+    return posts """
 
 
 # Get posts by their Ids
-@router.get("/{id}", response_model=schemas.Post)
+@router.get("/{id}", response_model=schemas.PostOut)
 def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    post = db.query(models.Post, func.count(models.Votes.post_id).label("votes")).join(
+        models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
+    
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id : {id} does not exist")
     return post
